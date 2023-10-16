@@ -4,8 +4,10 @@ import cors from "cors"
 import dbConntection from "./config/db"
 import dotenv from "dotenv"
 import globalError from "./middleware/errorMiddleware"
+import path  from "path"
+import mountRoutes from "./routes"
 
-dotenv.config({ path: ".env" });
+dotenv.config({ path: '.env'});
 const app = express()
 
 app.use(express.json({limit:"50mb"}))
@@ -18,6 +20,9 @@ app.use(cors({
 //Error handiling middelware
 app.use(globalError);
 
+
+// Middleware
+mountRoutes(app);
 app.use("*",(req:Request,res:Response,next:NextFunction)=>{
     const err= new Error(`Invalid URL: ${req.originalUrl}`) as any
     err.status = 404
