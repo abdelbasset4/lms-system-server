@@ -7,7 +7,7 @@ import sendEmail from "../utils/sendMail";
 import User, { IUser } from "../models/User";
 import ApiError from "../utils/ApiError";
 import { createActivationToken } from "../utils/generateToken";
-require("dotenv").config();
+import { sendToken } from "../utils/jwt";
 
 interface IRegisterBody {
   name: string;
@@ -62,24 +62,59 @@ interface IActivateAccount {
 export const activateAccount = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const {activate_token,activate_code} = req.body as IActivateAccount;
-      const newUser:{user:IUser,activateCode:string} = jwt.verify(activate_token,process.env.JWT_TOKEN as string) as {user:IUser,activateCode:string};
+      const { activate_token, activate_code } = req.body as IActivateAccount;
+      const newUser: { user: IUser; activateCode: string } = jwt.verify(
+        activate_token,
+        process.env.JWT_TOKEN as string
+      ) as { user: IUser; activateCode: string };
 
-      if(newUser.activateCode !== activate_code){
+      if (newUser.activateCode !== activate_code) {
         return next(new ApiError(`The activation code is invalid`, 400));
       }
 
-      const {name,email,password} = newUser.user;
+      const { name, email, password } = newUser.user;
 
-      const user = User.create({name,email,password});
+      const user = User.create({ name, email, password });
 
       res.status(200).json({
-        succes:true,
-        data: user
-      })
+        succes: true,
+        user,
+      });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
 
+interface ILogin {
+  email: string;
+  password: string;
+}
+
+export const login = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password } = req.body as ILogin;
+      const user = await User.findOne({ email }).select("+password");
+
+      if (!user || !(await user.comparePassword(password))) {
+        return next(new ApiError("there was an error in email or password", 401));
+      }
+
+      sendToken(user,200,res)
     } catch (error:any) {
       return next(new ApiError(error.message, 400));
     }
   }
 );
+
+export const logout = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      res.cookie("accessToken","",{maxAge:1})
+      res.cookie("refreshToken","",{maxAge:1})
+      res.status(200).json({success:true,message:"Logout successfully"})
+    } catch (error:any) {
+      return next(new ApiError(error.message, 400));
+    }
+  })

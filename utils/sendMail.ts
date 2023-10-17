@@ -1,5 +1,4 @@
 import ejs from "ejs"
-require("dotenv").config()
 import nodemailer,{Transporter} from "nodemailer"
 import path from "path"
 

@@ -1,6 +1,5 @@
 import { NextFunction, Request, Response } from "express";
 import ApiError from "../utils/ApiError";
-require("dotenv").config()
 
 const JWTInvalidSignatureError =()=> new ApiError('Invalid token please login again...',401)    
 const JWTExpired =()=> new ApiError('Token Expired please login again...',401)   

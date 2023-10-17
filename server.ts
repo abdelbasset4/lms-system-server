@@ -6,9 +6,8 @@ import dotenv from "dotenv";
 import globalError from "./middleware/errorMiddleware";
 import path from "path";
 import mountRoutes from "./routes";
-import userRoute from "./routes/authRoute";
 
-dotenv.config({ path: ".env" });
+require('dotenv').config({ path: ".env" });
 const app = express();
 
 app.use(express.json({ limit: "50mb" }));
