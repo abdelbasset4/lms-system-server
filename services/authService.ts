@@ -44,9 +44,11 @@ export const registerNewUser = asyncHandler(
             token: token
         })
       } catch (error: any) {
-        return next(new ApiError(`There was a problem to send email`, 500));
+        return next(new ApiError(`There was a problem to send email ${error}`, 500));
       }
-    } catch (error: any) {}
+    } catch (error: any) {
+      return next(new ApiError(`There was a problem ${error}`, 500));
+    }
   }
 );
 

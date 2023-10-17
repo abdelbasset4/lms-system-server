@@ -12,6 +12,7 @@
       margin: 0 auto;
       background-color: #fff;
       border-radius: 5px;
+      
       box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
     h1 {
@@ -30,14 +31,16 @@
       font-size: 24px;
       color: #007BFF;
       margin-top: 10px;
+      text-align: center;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Welcome to Our Service</h1>
+    <h1>Welcome to Our Service <br>Mr. <%= user.name %> </h1>
     <p>Thank you for joining our platform. To activate your account, please use the following activation code:</p>
-    <div class="activation-code"><%= activationCode %></div>
+    <div class="activation-code"><%= user.activateCode %></div>
     <p>If you have any questions or need assistance, please don't hesitate to contact us.</p>
   </div>
 </body>

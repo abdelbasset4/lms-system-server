@@ -1,8 +1,8 @@
 import express from 'express';
 import { registerNewUser } from '../services/authService';
 
-const route = express.Router()
+const userRoute = express.Router()
 
-route.post('register',registerNewUser)
+userRoute.post('/register',registerNewUser)
 
-export default route
+export default userRoute
