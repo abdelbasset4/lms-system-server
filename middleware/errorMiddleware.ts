@@ -5,7 +5,7 @@ const JWTInvalidSignatureError =()=> new ApiError('Invalid token please login ag
 const JWTExpired =()=> new ApiError('Token Expired please login again...',401)   
 const CastError = (err:any)=> new ApiError(`Resource not found ${err.path}`,400) 
 const DuplicateKeyError = (err:any)=> new ApiError(`Duplicate Key  ${Object.keys(err.keyValue)} entered`,400) 
-const globalError = (err:any, req:Request, res:Response, next:NextFunction) => {
+export const globalError = (err:any, req:Request, res:Response, next:NextFunction) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
     err.message = err.message || "Internal Server Error";
@@ -36,4 +36,4 @@ const productionError = (err:any,res:Response) => res.status(err.statusCode).jso
     status: err.status,
     message: err.message,
 })
-export default globalError
+// export default globalError

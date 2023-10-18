@@ -16,6 +16,7 @@ export interface IUser extends Document {
     isVerified:boolean;
     courses:Array<{courseId:string}>;
     comparePassword: (password:string)=>Promise<boolean>;
+    passwordChangedAt:Date,
     SignAccessToken :()=>string;
     SignRefreshToken :()=>string;
 }
@@ -42,6 +43,7 @@ const userSchema:Schema<IUser> = new mongoose.Schema({
         required:[true,"password is required"],
         minlength:[6,"the password must least 6 carachter"]
     },
+    passwordChangedAt:Date,
     avatar:{
         public_id:String,
         url:String,

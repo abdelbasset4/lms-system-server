@@ -14,7 +14,7 @@ export const sendToken = (user: IUser, statusCode: number, res: Response) => {
   const refreshToken = user.SignRefreshToken();
 
   //   redis
-  redis.set(user._id, JSON.stringify(refreshToken));
+  redis.set(user._id, JSON.stringify(user) as any);
 
   const accesTokenExpire = parseInt(
     process.env.ACCESS_TOKEN_EXPIRE || "300",

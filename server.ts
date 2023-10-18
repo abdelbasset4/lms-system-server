@@ -2,8 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import cookiesParser from "cookie-parser";
 import cors from "cors";
 import dbConntection from "./config/db";
-import dotenv from "dotenv";
-import globalError from "./middleware/errorMiddleware";
+import {globalError} from "./middleware/errorMiddleware";
 import path from "path";
 import mountRoutes from "./routes";
 
@@ -17,10 +16,6 @@ app.use(
     origin: process.env.ORIGIN,
   })
 );
-// app.use("/api/v1/auth", userRoute);
-
-//Error handiling middelware
-app.use(globalError);
 
 // Middleware
 mountRoutes(app);
@@ -30,6 +25,10 @@ app.use("*", (req: Request, res: Response, next: NextFunction) => {
   err.status = 404;
   next(err);
 });
+
+//Error handiling middelware note: put this bellow all routes
+app.use(globalError);
+
 const server = app.listen(process.env.PORT, () => {
   console.log(`listening on port ${process.env.PORT}`);
   dbConntection();

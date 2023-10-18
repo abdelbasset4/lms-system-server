@@ -8,6 +8,7 @@ import User, { IUser } from "../models/User";
 import ApiError from "../utils/ApiError";
 import { createActivationToken } from "../utils/generateToken";
 import { sendToken } from "../utils/jwt";
+import { redis } from "../config/redis";
 
 interface IRegisterBody {
   name: string;
@@ -113,6 +114,10 @@ export const logout = asyncHandler(
     try {
       res.cookie("accessToken","",{maxAge:1})
       res.cookie("refreshToken","",{maxAge:1})
+      const userId = req.user?._id || "" 
+      console.log(req.user);
+      
+      redis.del(userId)
       res.status(200).json({success:true,message:"Logout successfully"})
     } catch (error:any) {
       return next(new ApiError(error.message, 400));
