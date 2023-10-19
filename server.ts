@@ -5,6 +5,7 @@ import dbConntection from "./config/db";
 import {globalError} from "./middleware/errorMiddleware";
 import path from "path";
 import mountRoutes from "./routes";
+import {v2 as cloudinary} from "cloudinary";
 
 require('dotenv').config({ path: ".env" });
 const app = express();
@@ -16,6 +17,11 @@ app.use(
     origin: process.env.ORIGIN,
   })
 );
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret:process.env.CLOUDINARY_API_SECRET
+})
 
 // Middleware
 mountRoutes(app);

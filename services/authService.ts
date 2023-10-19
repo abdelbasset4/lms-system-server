@@ -9,7 +9,6 @@ import ApiError from "../utils/ApiError";
 import { createActivationToken } from "../utils/generateToken";
 import { accesTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt";
 import { redis } from "../config/redis";
-import { getUser } from "../features/user.features";
 
 interface IRegisterBody {
   name: string;
@@ -161,7 +160,8 @@ export const updateAccessToken = asyncHandler(
           expiresIn:"3d",
         }
       );
-
+      
+      req.user = user;
       res.cookie("accessToken", accessToken, accesTokenOptions);
       res.cookie("refreshToken", refreshToken, refreshTokenOptions);
 
@@ -175,15 +175,6 @@ export const updateAccessToken = asyncHandler(
   }
 );
 
-export const getUserInfo = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const userId = req.user?._id as string;
-    getUser(userId,res)
-  } catch (error: any) {
-    return next(new ApiError(error.message, 400));
-  }
-
-})
 
 
 interface ISocialAuth {
@@ -194,7 +185,7 @@ interface ISocialAuth {
 
 export const socialAuth = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const {name,email,avatar} = req.body ;
+    const {name,email,avatar} = req.body as ISocialAuth ;
     const user = await User.findOne({email})
     if(!user){
       const newUser = await User.create({name,email,avatar})
