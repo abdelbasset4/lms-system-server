@@ -6,8 +6,16 @@ import asyncHandler from "express-async-handler";
 import sendEmail from "../utils/sendMail";
 import User, { IUser } from "../models/User";
 import ApiError from "../utils/ApiError";
-import { createActivationToken } from "../utils/generateToken";
-import { accesTokenOptions, refreshTokenOptions, sendToken } from "../utils/jwt";
+import {
+  createActivationToken,
+  generateCode,
+  hashedResetCode,
+} from "../utils/generateToken";
+import {
+  accesTokenOptions,
+  refreshTokenOptions,
+  sendToken,
+} from "../utils/jwt";
 import { redis } from "../config/redis";
 
 interface IRegisterBody {
@@ -117,7 +125,6 @@ export const logout = asyncHandler(
       res.cookie("accessToken", "", { maxAge: 1 });
       res.cookie("refreshToken", "", { maxAge: 1 });
       const userId = req.user?._id || "";
-      console.log(req.user);
 
       redis.del(userId);
       res.status(200).json({ success: true, message: "Logout successfully" });
@@ -150,17 +157,17 @@ export const updateAccessToken = asyncHandler(
         { id: user._id },
         process.env.ACCESS_TOKEN as string,
         {
-          expiresIn:"5m",
+          expiresIn: "5m",
         }
       );
       const refreshToken = jwt.sign(
         { id: user._id },
         process.env.REFRESH_TOKEN as string,
         {
-          expiresIn:"3d",
+          expiresIn: "3d",
         }
       );
-      
+
       req.user = user;
       res.cookie("accessToken", accessToken, accesTokenOptions);
       res.cookie("refreshToken", refreshToken, refreshTokenOptions);
@@ -175,26 +182,131 @@ export const updateAccessToken = asyncHandler(
   }
 );
 
-
-
 interface ISocialAuth {
-  name:string,
-  email:string,
-  avatar:string
+  name: string;
+  email: string;
+  avatar: string;
 }
 
-export const socialAuth = asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const {name,email,avatar} = req.body as ISocialAuth ;
-    const user = await User.findOne({email})
-    if(!user){
-      const newUser = await User.create({name,email,avatar})
-      sendToken(newUser, 200, res);
-    }else{
-      sendToken(user, 200, res);
-
+export const socialAuth = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { name, email, avatar } = req.body as ISocialAuth;
+      const user = await User.findOne({ email });
+      if (!user) {
+        const newUser = await User.create({ name, email, avatar });
+        sendToken(newUser, 200, res);
+      } else {
+        sendToken(user, 200, res);
+      }
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
     }
-  } catch (error: any) {
-    return next(new ApiError(error.message, 400));
   }
-})
+);
+
+
+
+export const forgotPassword = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const user = await User.findOne({ email: req.body.email });
+      
+      if (!user) {
+        return next(
+          new ApiError(`There is no user for this email ${req.body.email}`, 404)
+        );
+      }
+      const resetCode = generateCode();
+      const hashedReset = hashedResetCode(resetCode);
+
+      user.passwordResetCode = hashedReset;
+      user.passwordResetCodeExpired = new Date(Date.now() + 10 * 60 * 1000);
+      user.passwordResetCodeVerify = false;
+
+      await user.save();
+
+      const data = { user: { name: user.name, resetCode } };
+      const html = await ejs.renderFile(
+        path.join(__dirname, "../mails/forgot-password.ejs"),
+        data
+      );
+
+      try {
+        await sendEmail({
+          email: user.email,
+          subject: "Your Rest Code",
+          template: "forgot-password.ejs",
+          data,
+        });
+        res.status(201).json({
+          succes: true,
+          message: `Please check your email ${user.email} to get reset code`,
+        });
+      } catch (error: any) {
+        user.passwordResetCode = "";
+        user.passwordResetCodeExpired = new Date();
+        user.passwordResetCodeVerify = false;
+        await user.save();
+        return next(
+          new ApiError(`There was a problem to send email ${error}`, 500)
+        );
+      }
+
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
+
+export const verifyResetCode = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const resetCodeHashed = hashedResetCode(req.body.resetCode as string);
+      const user = await User.findOne({
+        passwordResetCode: resetCodeHashed,
+        passwordResetCodeExpired: { $gt: Date.now() },
+      });
+      if (!user) {
+        return next(new ApiError(`Reset Code invalid or expired`, 500));
+      }
+      user.passwordResetCodeVerify = true;
+      await user.save();
+      res.status(200).json({ status: "reset code success" });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+      
+    }
+  }
+)
+
+interface IResetPassword {
+  email: string;
+  password: string;
+  confirmPassword: string;
+}
+export const resetPassword = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const { email, password, confirmPassword } = req.body as IResetPassword;
+    const user = await User.findOne({ email: email });
+    if (!user) {
+      return next(new ApiError(`There is no user for this email ${email}`, 404));
+    }
+    if (password !== confirmPassword) {
+      return next(new ApiError(`Password does not match`, 404));
+    }
+    if (!user.passwordResetCodeVerify) {
+      return next(new ApiError(`Please verify your reset code`, 404));
+    }
+    // Add the passwordResetCodeVerify property to the user object
+    user.password = password;
+    user.passwordResetCode = "";
+    user.passwordResetCodeExpired = new Date();
+    user.passwordResetCodeVerify = false;
+    await user.save();
+
+    sendToken(user, 200, res);
+    res.status(200).json({ status: "reset password success" });
+  } 
+)
