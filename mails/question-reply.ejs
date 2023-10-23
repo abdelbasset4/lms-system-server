@@ -1,0 +1,44 @@
+<!-- FILEPATH: /path/to/new-reply-email.ejs -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>New Reply to Your Question</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                font-size: 16px;
+                line-height: 1.5;
+            }
+            h1 {
+                font-size: 24px;
+                margin-bottom: 20px;
+            }
+            ul {
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }
+            li {
+                margin-bottom: 10px;
+            }
+            p {
+                margin-bottom: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>New Reply to Your Question</h1>
+        <p>Dear <%= name %>,</p>
+        <p>We are writing to inform you that your question has received a new reply.</p>
+        <p>The details of the reply are as follows:</p>
+        <ul>
+            <li>Question: <%= title %></li>
+        </ul>
+        <p>Please log in to your account to view the reply and continue the discussion.</p>
+        <p>Thank you for using our platform.</p>
+        <p>Sincerely,</p>
+        <p>The LMS Team</p>
+    </body>
+</html>
