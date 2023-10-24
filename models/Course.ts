@@ -63,16 +63,7 @@ const reviewSchema = new Schema<IReview>({
     required: [true, "Please add a comment"],
   },
   commentReply: [
-    {
-      user: {
-        type: Schema.Types.ObjectId,
-        ref: "User",
-      },
-      comment: {
-        type: String,
-        required: [true, "Please add a comment"],
-      },
-    },
+   Object
   ],
 });
 

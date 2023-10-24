@@ -270,7 +270,6 @@ export const addQuestionReply = asyncHandler(
           name: question.user.name,
           title:courseData.title,
         }
-        console.log(question);
         
         const html = await ejs.renderFile(path.join(__dirname, "../mails/question-reply.ejs"), data);
         if (question.user.email) {
@@ -297,3 +296,89 @@ export const addQuestionReply = asyncHandler(
     }
   }
 );
+
+// @desc add review to course
+// @route PUT /api/v1/course/add-review
+// @access Private
+interface IAddReview {
+  review: string;
+  rating: number;
+  userId: string;
+}
+export const addReview = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const userCourses = req.user?.courses
+    const { review, rating }: IAddReview = req.body;
+    const courseId = req.params.id;
+    const courseExiste = userCourses?.some((course)=>course.courseId.toString() ===courseId.toString())
+    if(!courseExiste){
+      return next(new ApiError("You are not allowed to add review in this course", 404));
+    }
+    const course = await Course.findById(courseId)
+    if(!course){
+      return next(new ApiError("Course not found", 404));
+    }
+    const newReview :any = {
+      user:req.user,
+      rating,
+      comment:review
+    }
+    course.reviews.push(newReview)
+
+    // calc raview average
+    let avg = 0;
+    course.reviews.forEach((course)=>{
+      avg +=course.rating
+    })
+    course.rating = avg / course.reviews.length;
+
+    await course.save()
+
+    res.status(200).json({
+      success: true,
+      course,
+    });
+    } catch (error:any) {
+      return next(new ApiError(error.message, 400));
+    }
+    
+  }
+)
+
+// @desc add reply in review 
+// @route PUT /api/v1/course/add-review-reply
+// @access Private(Admin)
+interface IReviewReply{
+  comment:string,
+  courseId:string,
+  reviewId:string
+}
+export const addReviewReply = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction)=>{
+    try {
+      const {comment,courseId,reviewId}:IReviewReply = req.body;
+      const course =await Course.findById(courseId)
+      if(!course){
+        return next(new ApiError("Course not found", 404));
+      }
+      const review = course?.reviews?.find((review)=>review._id.toString() ===reviewId)
+      if(!review){
+        return next(new ApiError("Review not found", 404));
+      }
+
+      const reviewReply:any = {
+        user:req.user,
+        comment
+      }
+      review.commentReply.push(reviewReply)
+      await course.save()
+      res.status(200).json({
+        success: true,
+        course,
+      });
+    } catch (error:any) {
+      return next(new ApiError(error.message,404))
+    }
+  }
+)
