@@ -173,3 +173,26 @@ export const updateUserRole = asyncHandler(
     }
   }
 );
+
+// @desc    Delete user
+// @route   DELETE /api/v1/users/delete-user/:id
+// @access  Private/Admin
+export const deleteUser = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {id} = req.params;
+      const user = await User.findById(id);
+      if (!user) {
+        return next(new ApiError("user not found", 404));
+      }
+      await user.deleteOne({id});
+      await redis.del(id);
+      res.status(200).json({
+        success: true,
+        message: "user deleted successfully",
+      });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);

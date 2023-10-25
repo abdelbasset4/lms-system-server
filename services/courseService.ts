@@ -405,3 +405,26 @@ export const addReviewReply = asyncHandler(
     }
   }
 )
+
+// @desc    Delete course
+// @route   DELETE /api/v1/course/delete-course/:id
+// @access  Private/Admin
+export const deleteCourse = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const {id} = req.params;
+      const course = await Course.findById(id);
+      if (!course) {
+        return next(new ApiError("course not found", 404));
+      }
+      await course.deleteOne({id});
+      await redis.del(id);
+      res.status(200).json({
+        success: true,
+        message: "course deleted successfully",
+      });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);

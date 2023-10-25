@@ -188,7 +188,7 @@ const courseSchema = new Schema<ICourse>({
     default:0
     // required: [true, "Please add a purshased"],
   },
-});
+},{timestamps:true});
 
 // Model
 const Course: Model<ICourse> = mongoose.model("Course", courseSchema);
