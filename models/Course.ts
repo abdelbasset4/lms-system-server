@@ -185,6 +185,7 @@ const courseSchema = new Schema<ICourse>({
   },
   purshased: {
     type: Number,
+    default:0
     // required: [true, "Please add a purshased"],
   },
 });

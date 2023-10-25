@@ -1,0 +1,57 @@
+<!-- FILEPATH: /D:/Abdelbasset/JS-Beginners-Projects-main/lms-server/mails/order-confirmation.ejs -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Confirmation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        p {
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #0069d9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Confirmation</h1>
+
+        <p>Thank you for purchasing the <%= order.title %> course on LMS Learning with Style. Your order has been received and is being processed.</p>
+        <p>price:<%= order.price %>$ </p>
+        <p>You will receive an email with instructions on how to access your course shortly.</p>
+        <p>If you have any questions or concerns, please don't hesitate to contact us.</p>
+    </div>
+</body>
+</html>
