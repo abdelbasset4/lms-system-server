@@ -5,7 +5,7 @@ import cloudinary from "cloudinary";
 import User from "../models/User";
 import ApiError from "../utils/ApiError";
 import { redis } from "../config/redis";
-import { getUser } from "../features/user.features";
+import { getUser, getUsers, updateUserRoleFeature } from "../features/user.features";
 import { sendToken } from "../utils/jwt";
 
 export const getLoggedUserData = asyncHandler(
@@ -20,6 +20,19 @@ export const getUserInfo = asyncHandler(
     try {
       const userId = req.user?._id as string;
       getUser(userId, res);
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
+// @desc    Get all users
+// @route   GET /api/v1/users/get-all
+// @access  Private/Admin
+export const getAllUsers = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      getUsers(res)
     } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }
@@ -140,6 +153,21 @@ export const updateUserAvatar = asyncHandler(
         success: true,
         user,
       });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
+// @desc    Update user role
+// @route   PUT /api/v1/user/:id/role
+// @access  Private/Admin
+export const updateUserRole = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { role } = req.body;
+      const userId = req.params.id;
+      updateUserRoleFeature(userId, role, res)
     } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }

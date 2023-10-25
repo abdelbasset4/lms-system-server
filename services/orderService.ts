@@ -8,7 +8,7 @@ import Course from "../models/Course";
 import  sendEmail  from "../utils/sendMail";
 import ApiError from "../utils/ApiError";
 import asyncHandeler from "express-async-handler";
-import { addOrder } from "../features/order.features";
+import { addOrder, getOrders } from "../features/order.features";
 
 // @desc    create new order
 // @route   POST /api/v1/orders
@@ -87,6 +87,19 @@ export const createOrder = asyncHandeler(
       });
     } catch (error: any) {
       return next(new ApiError(error.message, 500));
+    }
+  }
+);
+
+// @desc    Get all orders
+// @route   GET /api/v1/orders/get-all-admin-orders
+// @access  Private/Admin
+export const getAllAdminOrders = asyncHandeler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      getOrders(res)
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
     }
   }
 );

@@ -19,6 +19,7 @@
     "@types/jsonwebtoken": "^9.0.3",
     "@types/mongoose": "^5.11.97",
     "@types/node": "^20.8.5",
+    "@types/node-cron": "^3.0.10",
     "@types/nodemailer": "^6.4.11",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.41.0",
@@ -32,6 +33,7 @@
     "ioredis": "^5.3.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^7.6.2",
+    "node-cron": "^3.0.2",
     "nodemailer": "^6.9.6",
     "ts-node-dev": "^2.0.0"
   },

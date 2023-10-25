@@ -11,3 +11,12 @@ export const addOrder = asyncHandler(async (data: any, res: Response) => {
     order,
   });
 });
+
+// @desc   Get all orders
+export const getOrders = async (res: Response) => {
+  const order = await Order.find({}).sort({ createdAt: -1 });
+  res.status(200).json({
+      success: true,
+      order,
+  });
+}

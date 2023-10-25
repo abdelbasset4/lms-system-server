@@ -11,3 +11,12 @@ export const addCourse = asyncHandler(async (data: any, res: Response) => {
     course,
   });
 });
+
+// @desc   Get all users
+export const getCourses = async (res: Response) => {
+  const courses = await Course.find({}).sort({ createdAt: -1 });
+  res.status(200).json({
+      success: true,
+      courses,
+  });
+}

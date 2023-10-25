@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import cloudinary from "cloudinary";
-import { addCourse } from "../features/course.features";
+import { addCourse, getCourses } from "../features/course.features";
 import ApiError from "../utils/ApiError";
 import Course from "../models/Course";
 import { redis } from "../config/redis";
@@ -10,6 +10,7 @@ import path from "path";
 import ejs from "ejs";
 import sendEmail from "../utils/sendMail";
 import { log } from "console";
+import Notification from "../models/Notification";
 
 // @desc    Add course
 // @route   POST /api/v1/course/add-course
@@ -142,6 +143,19 @@ export const getAllCourses = asyncHandler(
   }
 );
 
+// @desc    Get all courses
+// @route   GET /api/v1/course/get-admin-courses
+// @access  Private/Admin
+export const getAllCoursesAdmin = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      getCourses(res)
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
 // @desc Get Single Course with purchase
 // @route GET /api/v1/course/get-my-courses/:id
 // @access Private
@@ -207,7 +221,11 @@ export const addQuastion = asyncHandler(
         questionReply: [],
       };
       courseData.questions.push(newQuestion);
-
+      await Notification.create({
+        title: "New question",
+        message: `you have a new question in  ${courseData.title} video`,
+        user: req.user?._id,
+      });
       await course.save();
       res.status(200).json({
         success: true,
@@ -264,6 +282,11 @@ export const addQuestionReply = asyncHandler(
 
       if(req.user?._id === question.user._id){
         // Send notification to user
+        await Notification.create({
+          title: "New question reply",
+          message: `you have a new question reply in  ${courseData.title} video`,
+          user: req.user?._id,
+        });
       }else{
         // send email
         const data = {
