@@ -8,6 +8,8 @@ import { redis } from "../config/redis";
 import { getUser, getUsers, updateUserRoleFeature } from "../features/user.features";
 import { sendToken } from "../utils/jwt";
 
+// @desc    put user id in params
+// @access  Private
 export const getLoggedUserData = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     req.params.id = req.user?._id;
@@ -15,6 +17,9 @@ export const getLoggedUserData = asyncHandler(
   }
 );
 
+// @desc    get logged user data
+// @route   GET /api/v1/users/getMe
+// @access  Private
 export const getUserInfo = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -39,6 +44,9 @@ export const getAllUsers = asyncHandler(
   }
 );
 
+// @desc    Update user profile
+// @route   PUT /api/v1/users/update-user
+// @access  Private
 interface IUSerUpdateInfo {
   email?: string;
   name?: string;
@@ -73,6 +81,9 @@ export const updateUserInfo = asyncHandler(
   }
 );
 
+// @desc    Update user password
+// @route   PUT /api/v1/users/update-user-password
+// @access  Private
 interface IUpdatePassword {
   currentpassword: string;
   confirmpassword: string;
@@ -106,11 +117,12 @@ export const updateUserPassword = asyncHandler(
   }
 );
 
+// @desc    Update user avatar
+// @route   PUT /api/v1/users/update-user-avatar
+// @access  Private
 interface IUpdateAvatar {
   avatar: string;
 }
-
-
 export const updateUserAvatar = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {

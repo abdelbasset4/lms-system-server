@@ -18,13 +18,16 @@ import {
 } from "../utils/jwt";
 import { redis } from "../config/redis";
 
+
+// @desc    Register new user
+// @route   POST /api/v1/auth/register
+// @access  Public
 interface IRegisterBody {
   name: string;
   email: string;
   password: string;
   avatar?: string;
 }
-
 export const registerNewUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -64,6 +67,9 @@ export const registerNewUser = asyncHandler(
   }
 );
 
+// @desc   Activate user account
+// @route  POST /api/v1/auth/activate-account
+// @access Public
 interface IActivateAccount {
   activate_token: string;
   activate_code: string;
@@ -95,6 +101,9 @@ export const activateAccount = asyncHandler(
   }
 );
 
+// @desc    Login user
+// @route   POST /api/v1/auth/login
+// @access  Public
 interface ILogin {
   email: string;
   password: string;
@@ -119,6 +128,9 @@ export const login = asyncHandler(
   }
 );
 
+// @desc    Logout user
+// @route   GET /api/v1/auth/logout
+// @access  Private
 export const logout = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -134,6 +146,9 @@ export const logout = asyncHandler(
   }
 );
 
+// @desc    Update Access Token for user using refresh token
+// @route   GET /api/v1/auth/refreshtoken
+// @access  Private
 export const updateAccessToken = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -149,7 +164,7 @@ export const updateAccessToken = asyncHandler(
       }
       const session = await redis.get(decoded.id as string);
       if (!session) {
-        return next(new ApiError("token invalid", 401));
+        return next(new ApiError("please login to acces this website", 401));
       }
       const user = JSON.parse(session);
 
@@ -171,7 +186,8 @@ export const updateAccessToken = asyncHandler(
       req.user = user;
       res.cookie("accessToken", accessToken, accesTokenOptions);
       res.cookie("refreshToken", refreshToken, refreshTokenOptions);
-
+      
+      await redis.set(user._id, JSON.stringify(user), "EX", 7 * 24 * 60 * 60); // 7 days
       res.status(200).json({
         success: true,
         accessToken,
@@ -182,6 +198,9 @@ export const updateAccessToken = asyncHandler(
   }
 );
 
+// @desc   Login with author social media accounts like google, facebook, github
+// @route  POST /api/v1/auth/socialauth
+// @access Public
 interface ISocialAuth {
   name: string;
   email: string;
@@ -206,7 +225,9 @@ export const socialAuth = asyncHandler(
 );
 
 
-
+// @desc   Forgot password
+// @route  POST /api/v1/auth/forgot-password
+// @access Public
 export const forgotPassword = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -259,7 +280,9 @@ export const forgotPassword = asyncHandler(
   }
 );
 
-
+// @desc  Verify reset code
+// @route POST /api/v1/auth/verifyResetCode
+// @access Public
 export const verifyResetCode = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -281,6 +304,9 @@ export const verifyResetCode = asyncHandler(
   }
 )
 
+// @desc  Reset password
+// @route PUT /api/v1/auth/resetPassword
+// @access Public
 interface IResetPassword {
   email: string;
   password: string;

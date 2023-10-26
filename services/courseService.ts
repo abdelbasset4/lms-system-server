@@ -98,7 +98,7 @@ export const getSingleCourse = asyncHandler(
         if (!course) {
           return next(new ApiError("Course not found", 404));
         }
-        await redis.set(courseId, JSON.stringify(course));
+        await redis.set(courseId, JSON.stringify(course),"EX", 7 * 24 * 60 * 60); // 7 days
         res.status(200).json({
           success: true,
           course,

@@ -4,6 +4,7 @@ import courseRoute from './courseRoute';
 import orderRoute from './orderRoute';
 import notificationRoute from './notificationRoute';
 import analyticsRoute from './analyticsRoute';
+import layoutRoute from './layoutRoute';
 
 const mountRoutes = (app:any)=>{
     // Middelware
@@ -13,6 +14,7 @@ const mountRoutes = (app:any)=>{
     app.use('/api/v1/order',orderRoute)
     app.use('/api/v1/notification',notificationRoute)
     app.use('/api/v1/analytics',analyticsRoute)
+    app.use('/api/v1/layout',layoutRoute)
 }
 
 export default mountRoutes
