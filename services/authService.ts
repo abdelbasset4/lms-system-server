@@ -89,7 +89,7 @@ export const activateAccount = asyncHandler(
 
       const { name, email, password } = newUser.user;
 
-      const user = User.create({ name, email, password });
+      const user = await User.create({ name, email, password });
 
       res.status(200).json({
         succes: true,
@@ -137,7 +137,8 @@ export const logout = asyncHandler(
       res.cookie("accessToken", "", { maxAge: 1 });
       res.cookie("refreshToken", "", { maxAge: 1 });
       const userId = req.user?._id || "";
-
+      console.log("this logout user");
+      
       redis.del(userId);
       res.status(200).json({ success: true, message: "Logout successfully" });
     } catch (error: any) {
@@ -212,8 +213,12 @@ export const socialAuth = asyncHandler(
     try {
       const { name, email, avatar } = req.body as ISocialAuth;
       const user = await User.findOne({ email });
+
+      console.log("this user is social auth");
       if (!user) {
         const newUser = await User.create({ name, email, avatar });
+        console.log("this is new user");
+        
         sendToken(newUser, 200, res);
       } else {
         sendToken(user, 200, res);
@@ -333,6 +338,6 @@ export const resetPassword = asyncHandler(
     await user.save();
 
     sendToken(user, 200, res);
-    res.status(200).json({ status: "reset password success" });
+    // res.status(200).json({ status: "reset password success" });
   } 
 )

@@ -48,22 +48,19 @@ export const getAllUsers = asyncHandler(
 // @route   PUT /api/v1/users/update-user
 // @access  Private
 interface IUSerUpdateInfo {
-  email?: string;
   name?: string;
 }
 export const updateUserInfo = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, name } = req.body as IUSerUpdateInfo;
+      const {name} = req.body as IUSerUpdateInfo;
       const userId = req.user?._id as string;
       const user = await User.findById(userId);
       if (!user) {
         return next(new ApiError("user not found", 404));
       }
 
-      if (email) {
-        user.email = email;
-      }
+     
       if (name) {
         user.name = name;
       }
@@ -92,50 +89,39 @@ interface IUpdatePassword {
 
 export const updateUserPassword = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      const { password } = req.body as IUpdatePassword;
-      const userId = req.user?._id as string;
-      const user = await User.findById(userId);
-      if (!user) {
-        return next(new ApiError("user not found", 404));
-      }
-
-      user.password = await bcrypt.hash(password, 12);
-      user.passwordChangedAt = new Date(Date.now());
-
-      await user.save();
-
-      sendToken(user, 200, res);
-      await redis.set(userId, JSON.stringify(user));
-      res.status(200).json({
-        success: true,
-        user,
-      });
-    } catch (error: any) {
-      return next(new ApiError(error.message, 400));
+    const userId = req.user?._id as string;
+    const user = await User.findByIdAndUpdate(userId,{
+      password : await bcrypt.hash(req.body.password,12),
+      passwordChangedAt:Date.now()
+    }, { new: true });
+    if (!user) {
+      return next(new ApiError("user not found", 404));
     }
+    sendToken(user, 200, res);
+    await redis.set(userId, JSON.stringify(user));
   }
 );
 
 // @desc    Update user avatar
 // @route   PUT /api/v1/users/update-user-avatar
 // @access  Private
-interface IUpdateAvatar {
-  avatar: string;
-}
+
 export const updateUserAvatar = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { avatar } = req.body as IUpdateAvatar;
-
+      const { avatar } = req.body ;
+      
       const userId = req.user?._id as string;
-
+      console.log(avatar);
+      
       const user = await User.findById(userId);
       if (!user) {
         return next(new ApiError("user not found", 404));
       }
       if (avatar) {
         if (user?.avatar?.public_id) {
+          console.log("this is old avatar");
+                    
           await cloudinary.v2.uploader.destroy(user?.avatar?.public_id);
           const myCloud = await cloudinary.v2.uploader.upload(avatar, {
             folder: "avatars",
@@ -145,7 +131,10 @@ export const updateUserAvatar = asyncHandler(
             public_id: myCloud.public_id,
             url: myCloud.secure_url,
           };
-        }else{
+
+        }else{       
+            console.log("this is new avatar");
+            
             const myCloud = await cloudinary.v2.uploader.upload(avatar, {
                 folder: "avatars",
                 width: 150,
@@ -157,9 +146,9 @@ export const updateUserAvatar = asyncHandler(
         }
       }
 
-      await user?.save();
+      await user.save();
 
-      sendToken(user, 200, res);
+      // sendToken(user, 200, res);
       await redis.set(userId, JSON.stringify(user));
       res.status(200).json({
         success: true,
