@@ -22,7 +22,7 @@ interface ICourseData extends Document {
   title: string;
   description: string;
   videoUrl: string;
-  // videoThumbnail: object;
+  videoThumbnail: object;
   videoSection: string;
   videoDuration: number;
   videoPlayer: string;
@@ -36,7 +36,7 @@ interface ICourse extends Document {
   description: string;
   price: number;
   discount: number;
-  // thumbnail: object;
+  thumbnail: object;
   courseData: ICourseData[];
   reviews: IReview[];
   tags: string[];
@@ -102,10 +102,10 @@ const courseDataSchema = new Schema<ICourseData>({
     type: String,
     required: [true, "Please add a video url"],
   },
-  // videoThumbnail: {
-  //   type: Object,
-  //   required: [true, "Please add a video thumbnail"],
-  // },
+  videoThumbnail: {
+    type: Object,
+    
+  },
   videoSection: {
     type: String,
     required: [true, "Please add a video section"],
@@ -142,16 +142,16 @@ const courseSchema = new Schema<ICourse>({
   discount: {
     type: Number,
   },
-  // thumbnail: {
-  //   public_id: {
-  //     type: String,
-  //     // required: [true, "Please add a thumbnail public_id"],
-  //   },
-  //   url: {
-  //     type: String,
-  //     // required: [true, "Please add a thumbnail url"],
-  //   },
-  // },
+  thumbnail: {
+    public_id: {
+      type: String,
+      
+    },
+    url: {
+      type: String,
+      
+    },
+  },
   courseData: [courseDataSchema],
   reviews: [reviewSchema],
   tags: [String],
@@ -186,7 +186,7 @@ const courseSchema = new Schema<ICourse>({
   purshased: {
     type: Number,
     default:0
-    // required: [true, "Please add a purshased"],
+    
   },
 },{timestamps:true});
 
