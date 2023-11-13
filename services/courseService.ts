@@ -11,6 +11,7 @@ import ejs from "ejs";
 import sendEmail from "../utils/sendMail";
 import { log } from "console";
 import Notification from "../models/Notification";
+import axios from "axios";
 
 // @desc    Add course
 // @route   POST /api/v1/course/add-course
@@ -98,7 +99,12 @@ export const getSingleCourse = asyncHandler(
         if (!course) {
           return next(new ApiError("Course not found", 404));
         }
-        await redis.set(courseId, JSON.stringify(course),"EX", 7 * 24 * 60 * 60); // 7 days
+        await redis.set(
+          courseId,
+          JSON.stringify(course),
+          "EX",
+          7 * 24 * 60 * 60
+        ); // 7 days
         res.status(200).json({
           success: true,
           course,
@@ -149,7 +155,7 @@ export const getAllCourses = asyncHandler(
 export const getAllCoursesAdmin = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      getCourses(res)
+      getCourses(res);
     } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }
@@ -250,7 +256,7 @@ export const addQuestionReply = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { reply, questionId, courseId, contentId }: IAddQuestionReply =
-      req.body;
+        req.body;
       const course = await Course.findById(courseId);
       if (!mongoose.Types.ObjectId.isValid(contentId)) {
         return next(new ApiError("Content not found", 404));
@@ -271,37 +277,40 @@ export const addQuestionReply = asyncHandler(
       if (!question) {
         return next(new ApiError("Question not found", 404));
       }
-      
+
       // create new reply object
       const newReply: any = {
         user: req.user,
-        comment: reply
+        comment: reply,
       };
       question.questionReply.push(newReply);
       await course.save();
 
-      if(req.user?._id === question.user._id){
+      if (req.user?._id === question.user._id) {
         // Send notification to user
         await Notification.create({
           title: "New question reply",
           message: `you have a new question reply in  ${courseData.title} video`,
           user: req.user?._id,
         });
-      }else{
+      } else {
         // send email
         const data = {
           name: question.user.name,
-          title:courseData.title,
-        }
-        
-        const html = await ejs.renderFile(path.join(__dirname, "../mails/question-reply.ejs"), data);
+          title: courseData.title,
+        };
+
+        const html = await ejs.renderFile(
+          path.join(__dirname, "../mails/question-reply.ejs"),
+          data
+        );
         if (question.user.email) {
           try {
             await sendEmail({
               email: question.user.email,
               subject: "Question Reply",
               template: "question-reply.ejs",
-              data
+              data,
             });
           } catch (error: any) {
             return next(new ApiError(error.message, 400));
@@ -314,7 +323,7 @@ export const addQuestionReply = asyncHandler(
         success: true,
         course,
       });
-    }  catch (error: any) {
+    } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }
   }
@@ -331,80 +340,85 @@ interface IAddReview {
 export const addReview = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userCourses = req.user?.courses
-    const { review, rating }: IAddReview = req.body;
-    const courseId = req.params.id;
-    const courseExiste = userCourses?.some((course)=>course.courseId.toString() ===courseId.toString())
-    if(!courseExiste){
-      return next(new ApiError("You are not allowed to add review in this course", 404));
-    }
-    const course = await Course.findById(courseId)
-    if(!course){
-      return next(new ApiError("Course not found", 404));
-    }
-    const newReview :any = {
-      user:req.user,
-      rating,
-      comment:review
-    }
-    course.reviews.push(newReview)
-
-    // calc raview average
-    let avg = 0;
-    course.reviews.forEach((course)=>{
-      avg +=course.rating
-    })
-    course.rating = avg / course.reviews.length;
-
-    await course.save()
-
-    res.status(200).json({
-      success: true,
-      course,
-    });
-    } catch (error:any) {
-      return next(new ApiError(error.message, 400));
-    }
-    
-  }
-)
-
-// @desc add reply in review 
-// @route PUT /api/v1/course/add-review-reply
-// @access Private(Admin)
-interface IReviewReply{
-  comment:string,
-  courseId:string,
-  reviewId:string
-}
-export const addReviewReply = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction)=>{
-    try {
-      const {comment,courseId,reviewId}:IReviewReply = req.body;
-      const course =await Course.findById(courseId)
-      if(!course){
+      const userCourses = req.user?.courses;
+      const { review, rating }: IAddReview = req.body;
+      const courseId = req.params.id;
+      const courseExiste = userCourses?.some(
+        (course) => course.courseId.toString() === courseId.toString()
+      );
+      if (!courseExiste) {
+        return next(
+          new ApiError("You are not allowed to add review in this course", 404)
+        );
+      }
+      const course = await Course.findById(courseId);
+      if (!course) {
         return next(new ApiError("Course not found", 404));
       }
-      const review = course?.reviews?.find((review)=>review._id.toString() ===reviewId)
-      if(!review){
-        return next(new ApiError("Review not found", 404));
-      }
+      const newReview: any = {
+        user: req.user,
+        rating,
+        comment: review,
+      };
+      course.reviews.push(newReview);
 
-      const reviewReply:any = {
-        user:req.user,
-        comment
-      }
-      review.commentReply.push(reviewReply)
-      await course.save()
+      // calc raview average
+      let avg = 0;
+      course.reviews.forEach((course) => {
+        avg += course.rating;
+      });
+      course.rating = avg / course.reviews.length;
+
+      await course.save();
+
       res.status(200).json({
         success: true,
         course,
       });
-    } catch (error:any) {
-      return next(new ApiError(error.message,404))
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
     }
   }
-)
+);
+
+// @desc add reply in review
+// @route PUT /api/v1/course/add-review-reply
+// @access Private(Admin)
+interface IReviewReply {
+  comment: string;
+  courseId: string;
+  reviewId: string;
+}
+export const addReviewReply = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { comment, courseId, reviewId }: IReviewReply = req.body;
+      const course = await Course.findById(courseId);
+      if (!course) {
+        return next(new ApiError("Course not found", 404));
+      }
+      const review = course?.reviews?.find(
+        (review) => review._id.toString() === reviewId
+      );
+      if (!review) {
+        return next(new ApiError("Review not found", 404));
+      }
+
+      const reviewReply: any = {
+        user: req.user,
+        comment,
+      };
+      review.commentReply.push(reviewReply);
+      await course.save();
+      res.status(200).json({
+        success: true,
+        course,
+      });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 404));
+    }
+  }
+);
 
 // @desc    Delete course
 // @route   DELETE /api/v1/course/delete-course/:id
@@ -412,17 +426,64 @@ export const addReviewReply = asyncHandler(
 export const deleteCourse = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const {id} = req.params;
+      const { id } = req.params;
       const course = await Course.findById(id);
       if (!course) {
         return next(new ApiError("course not found", 404));
       }
-      await course.deleteOne({id});
+      await course.deleteOne({ id });
       await redis.del(id);
       res.status(200).json({
         success: true,
         message: "course deleted successfully",
       });
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
+// @desc    Generate Course Video Url
+// @route   POST /api/v1/course/generate-video-url
+// @access  Private/Admin
+export const generateVideoUrl = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { videoId } = req.body;
+      const videoUrl = await axios.post(
+        `https://dev.vdocipher.com/api/videos/${videoId}/otp`,
+        { ttl: 300 },
+        {
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Apisecret ${process.env.VDOCIPHER_API_KEY}`,
+          },
+        }
+      );
+      res.status(200).json(videoUrl.data);
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
+export const generateVideoUrlV2 = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { videoId } = req.params;
+      const response = await axios.get(
+        `https://api.wistia.com/v1/medias/${videoId}.json`,
+        {
+          headers: {
+            accept: "application/json",
+            authorization:
+              "Bearer cfbd28e5320966c6d1088a912f7d345fdcafabb0769e1babf44984262f21f2a6",
+          },
+        }
+      );
+      const videoUrl = response.data.assets[0].url;
+      res.status(200).json(videoUrl);
     } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }

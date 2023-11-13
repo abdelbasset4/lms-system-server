@@ -181,7 +181,8 @@ const courseSchema = new Schema<ICourse>({
   ],
   rating: {
     type: Number,
-    required: [true, "Please add a rating"],
+    default:0
+    // required: [true, "Please add a rating"],
   },
   purshased: {
     type: Number,
