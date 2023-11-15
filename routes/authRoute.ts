@@ -15,6 +15,6 @@ authRoute.post('/verifyResetCode',verifyResetCode)
 authRoute.put('/resetPassword',resetPassword)
 
 authRoute.get('/logout',isAuthenticated,logout)
-authRoute.get('/refreshtoken',updateAccessToken)
+// authRoute.get('/refreshtoken',updateAccessToken)
 
 export default authRoute

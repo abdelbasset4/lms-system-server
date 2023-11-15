@@ -161,13 +161,17 @@ export const updateUserAvatar = asyncHandler(
 );
 
 // @desc    Update user role
-// @route   PUT /api/v1/user/:id/role
+// @route   PUT /api/v1/user/update-role
 // @access  Private/Admin
 export const updateUserRole = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { role } = req.body;
-      const userId = req.params.id;
+      const { role,email } = req.body;
+      const user = await User.findOne({email});
+      if (!user) {
+        return next(new ApiError("user not found", 404));
+      }
+      const userId = user._id;
       updateUserRoleFeature(userId, role, res)
     } catch (error: any) {
       return next(new ApiError(error.message, 400));

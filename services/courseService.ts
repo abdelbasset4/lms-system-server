@@ -122,7 +122,6 @@ export const getSingleCourse = asyncHandler(
 export const getAllCourses = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const courseId = req.params.id;
       const isCashCourse = await redis.get("allCourses");
       if (isCashCourse) {
         const course = JSON.parse(isCashCourse);

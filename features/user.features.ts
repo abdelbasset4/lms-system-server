@@ -30,12 +30,6 @@ export const getUsers = async (res: Response) => {
 // @desc    Update user role
 export const updateUserRoleFeature = async (id: string, role: string, res: Response) => {
     const user = await User.findByIdAndUpdate(id, {role}, { new: true });
-    if (!user) {
-        return res.status(404).json({
-            success: false,
-            message: "user not found",
-        });
-    }
     res.status(200).json({
         success: true,
         user,

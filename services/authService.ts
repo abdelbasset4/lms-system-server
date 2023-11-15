@@ -189,7 +189,7 @@ export const updateAccessToken = asyncHandler(
       res.cookie("refreshToken", refreshToken, refreshTokenOptions);
       
       await redis.set(user._id, JSON.stringify(user), "EX", 7 * 24 * 60 * 60); // 7 days
-        next();
+      return  next();
     } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }
