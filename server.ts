@@ -3,7 +3,6 @@ import cookiesParser from "cookie-parser";
 import cors from "cors";
 import dbConntection from "./config/db";
 import {globalError} from "./middleware/errorMiddleware";
-import path from "path";
 import mountRoutes from "./routes";
 import {v2 as cloudinary} from "cloudinary";
 
@@ -23,7 +22,6 @@ cloudinary.config({
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret:process.env.CLOUDINARY_API_SECRET
 })
-
 
 // Middleware
 mountRoutes(app);
@@ -48,5 +46,3 @@ process.on("unhandledRejection", (err: any) => {
     process.exit(1);
   });
 });
-
-
