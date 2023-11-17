@@ -45,7 +45,7 @@ export const editCourse = asyncHandler(
     try {
       const data = req.body;
       const thumbnail = req.body.thumbnail;
-      if (thumbnail) {
+      if (thumbnail && !thumbnail.startsWith("https")) {
         await cloudinary.v2.uploader.destroy(thumbnail.public_id);
         const myCloud = await cloudinary.v2.uploader.upload(thumbnail, {
           folder: "courses",
@@ -53,6 +53,12 @@ export const editCourse = asyncHandler(
         data.thumbnail = {
           public_id: myCloud.public_id,
           url: myCloud.secure_url,
+        };
+      }
+      if(thumbnail && thumbnail.startsWith("https")){
+        data.thumbnail = {
+          public_id: thumbnail,
+          url: thumbnail,
         };
       }
       const course = await Course.findByIdAndUpdate(

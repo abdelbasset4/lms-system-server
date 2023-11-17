@@ -62,9 +62,7 @@ const reviewSchema = new Schema<IReview>({
     type: String,
     required: [true, "Please add a comment"],
   },
-  commentReply: [
-   Object
-  ],
+  commentReply: [Object],
 });
 
 const linkSchema = new Schema<ILink>({
@@ -84,9 +82,7 @@ const commentSchema = new Schema<IComment>({
     type: String,
     required: [true, "Please add a comment"],
   },
-  questionReply: [
-    Object
-  ],
+  questionReply: [Object],
 });
 
 const courseDataSchema = new Schema<ICourseData>({
@@ -104,92 +100,91 @@ const courseDataSchema = new Schema<ICourseData>({
   },
   videoThumbnail: {
     type: Object,
-    
   },
   videoSection: {
     type: String,
-    required: [true, "Please add a video section"],
+    // required: [true, "Please add a video section"],
   },
   videoDuration: {
     type: Number,
-    required: [true, "Please add a video duration"],
+    // required: [true, "Please add a video duration"],
   },
   videoPlayer: {
     type: String,
-    required: [true, "Please add a video player"],
+    // required: [true, "Please add a video player"],
   },
   links: [linkSchema],
   suggestions: {
     type: String,
-    required: [true, "Please add a suggestions"],
+    // required: [true, "Please add a suggestions"],
   },
   questions: [commentSchema],
 });
 
-const courseSchema = new Schema<ICourse>({
-  title: {
-    type: String,
-    required: [true, "Please add a course title"],
-  },
-  description: {
-    type: String,
-    required: [true, "Please add a course description"],
-  },
-  price: {
-    type: Number,
-    required: [true, "Please add a course price"],
-  },
-  discount: {
-    type: Number,
-  },
-  thumbnail: {
-    public_id: {
+const courseSchema = new Schema<ICourse>(
+  {
+    title: {
       type: String,
-      
+      required: [true, "Please add a course title"],
     },
-    url: {
+    description: {
       type: String,
-      
+      required: [true, "Please add a course description"],
     },
-  },
-  courseData: [courseDataSchema],
-  reviews: [reviewSchema],
-  tags: [String],
-  level: {
-    type: String,
-    required: [true, "Please add a course level"],
-  },
-  demoUrl: {
-    type: String,
-    required: [true, "Please add a demo url"],
-  },
-  benifits: [
-    {
-      title: {
+    price: {
+      type: Number,
+      required: [true, "Please add a course price"],
+    },
+    discount: {
+      type: Number,
+    },
+    thumbnail: {
+      public_id: {
         type: String,
-        required: [true, "Please add a benifit title"],
+      },
+      url: {
+        type: String,
       },
     },
-  ],
-  requirements: [
-    {
-      title: {
-        type: String,
-        required: [true, "Please add a requirement title"],
-      },
+    courseData: [courseDataSchema],
+    reviews: [reviewSchema],
+    tags: [String],
+    level: {
+      type: String,
+      required: [true, "Please add a course level"],
     },
-  ],
-  rating: {
-    type: Number,
-    default:0
-    // required: [true, "Please add a rating"],
+    demoUrl: {
+      type: String,
+      required: [true, "Please add a demo url"],
+    },
+    benifits: [
+      {
+        title: {
+          type: String,
+          required: [true, "Please add a benifit title"],
+        },
+      },
+    ],
+    requirements: [
+      {
+        title: {
+          type: String,
+          required: [true, "Please add a requirement title"],
+        },
+      },
+    ],
+    rating: {
+      type: Number,
+      default: 0,
+      // required: [true, "Please add a rating"],
+    },
+    purshased: {
+      type: Number,
+      default: 0,
+    },
   },
-  purshased: {
-    type: Number,
-    default:0
-    
-  },
-},{timestamps:true});
+  { timestamps: true }
+);
 
 // Model
 const Course: Model<ICourse> = mongoose.model("Course", courseSchema);
