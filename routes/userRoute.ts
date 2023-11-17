@@ -1,7 +1,6 @@
 import express from 'express';
 const userRoute = express.Router()
 import { isAllowed, isAuthenticated } from '../middleware/auth';
-
 import { deleteUser, getAllUsers, getLoggedUserData, getUserInfo, updateUserAvatar, updateUserInfo, updateUserPassword, updateUserRole } from '../services/userService';
 import { changePasswordValidator } from '../utils/validator/userValidator';
 
@@ -14,6 +13,7 @@ userRoute.get('/getMe',isAuthenticated,getUserInfo)
 userRoute.get('/get-all',isAuthenticated,isAllowed("admin"),getAllUsers)
 
 userRoute.delete('/delete-user/:id',isAuthenticated,isAllowed("admin"),deleteUser)
+
 
 
 export default userRoute

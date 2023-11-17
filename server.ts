@@ -24,6 +24,7 @@ cloudinary.config({
   api_secret:process.env.CLOUDINARY_API_SECRET
 })
 
+
 // Middleware
 mountRoutes(app);
 
@@ -47,3 +48,5 @@ process.on("unhandledRejection", (err: any) => {
     process.exit(1);
   });
 });
+
+
