@@ -119,6 +119,7 @@ const courseDataSchema = new Schema<ICourseData>({
     // required: [true, "Please add a suggestions"],
   },
   questions: [commentSchema],
+  
 });
 
 const courseSchema = new Schema<ICourse>(

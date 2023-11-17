@@ -71,6 +71,7 @@ export const editCourse = asyncHandler(
           runValidators: true,
         }
       );
+      
       if (!course) {
         return next(new ApiError("Course not found", 404));
       }
