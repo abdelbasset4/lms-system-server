@@ -34,6 +34,7 @@ interface ICourseData extends Document {
 interface ICourse extends Document {
   title: string;
   description: string;
+  categories: string;
   price: number;
   discount: number;
   thumbnail: object;
@@ -131,6 +132,10 @@ const courseSchema = new Schema<ICourse>(
     description: {
       type: String,
       required: [true, "Please add a course description"],
+    },
+    categories:{
+      type:String,
+      required: [true, "Please add a course categories"],
     },
     price: {
       type: Number,

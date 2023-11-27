@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import cloudinary from "cloudinary";
-import { addCourse, getCourses } from "../features/course.features";
+import { addCourse, getCourses, getTopCourses } from "../features/course.features";
 import ApiError from "../utils/ApiError";
 import Course from "../models/Course";
 import { redis } from "../config/redis";
@@ -9,7 +9,6 @@ import mongoose from "mongoose";
 import path from "path";
 import ejs from "ejs";
 import sendEmail from "../utils/sendMail";
-import { log } from "console";
 import Notification from "../models/Notification";
 import axios from "axios";
 
@@ -162,6 +161,19 @@ export const getAllCoursesAdmin = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       getCourses(res);
+    } catch (error: any) {
+      return next(new ApiError(error.message, 400));
+    }
+  }
+);
+
+// @desc    Get Top all courses
+// @route   GET /api/v1/course/get-top-admin-courses
+// @access  Private/Admin
+export const getTopCoursesAdmin = asyncHandler(
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      getTopCourses(res);
     } catch (error: any) {
       return next(new ApiError(error.message, 400));
     }

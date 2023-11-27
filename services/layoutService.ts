@@ -13,7 +13,7 @@ export const createLayout = asyncHandeler(
     if (typeExiste) {
       return next(new ApiError(`${type} alredy existe`, 400));
     }
-    if (type === "banner") {
+    if (type === "Banner") {
       const { title, subtitle, image } = req.body;
       if (!title || !subtitle || !image) {
         return next(new ApiError("title,subtitle and image are required", 400));
@@ -22,12 +22,15 @@ export const createLayout = asyncHandeler(
         folder: "layout/banner",
       });
       const banner = {
-        image: {
-          public_id: myCloud.public_id,
-          url: myCloud.secure_url,
+        type: "banner",
+        banner: {
+          image: {
+            public_id: myCloud.public_id,
+            url: myCloud.secure_url,
+          },
+          title,
+          subtitle,
         },
-        title,
-        subtitle,
       };
       await Layout.create(banner);
     }
@@ -66,42 +69,43 @@ export const createLayout = asyncHandeler(
 export const updateLayout = asyncHandeler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { type } = req.body;
+    
     if (type === "banner") {
-        const bannerData :any = await Layout.findOne({ type: "banner" });
-        if(bannerData){
-          await cloudinary.v2.uploader.destroy(bannerData.image.public_id);
-        }
+      const bannerData: any = await Layout.findOne({ type: "banner" });
       const { title, subtitle, image } = req.body;
-      if (!title || !subtitle || !image) {
-        return next(new ApiError("title,subtitle and image are required", 400));
-      }
-
-      const myCloud = await cloudinary.v2.uploader.upload(image, {
+      
+      const data = image?.startsWith("https") ? bannerData : await cloudinary.v2.uploader.upload(image, {
         folder: "layout/banner",
       });
       const banner = {
+        type: "banner",
         image: {
-          public_id: myCloud.public_id,
-          url: myCloud.secure_url,
+          public_id: image?.startsWith("https") ? bannerData.banner.image.public_id : data?.public_id,
+          url: image?.startsWith("https") ? bannerData.banner.image.url : data?.secure_url,
         },
         title,
         subtitle,
       };
-      await Layout.findByIdAndUpdate(bannerData._id,{banner});
+      await Layout.findByIdAndUpdate(bannerData._id, { banner });
     }
     if (type === "FAQ") {
       const { faq } = req.body;
-      const faqData = await Layout.findOne({type:"FAQ"})
+      const faqData = await Layout.findOne({ type: "FAQ" });
       const faqItem = await Promise.all(
         faq.map(async (item: any) => {
           return { question: item.question, answer: item.answer };
         })
       );
-      await Layout.findByIdAndUpdate(faqData?._id,{ type: "FAQ", faqs: faqItem });
+      await Layout.findByIdAndUpdate(faqData?._id, {
+        type: "FAQ",
+        faqs: faqItem,
+      });
     }
     if (type === "category") {
       const { category } = req.body;
-      const categoryData = await Layout.findOne({type:"category"})
+      const categoryData = await Layout.findOne({ type: "category" });
+      console.log(categoryData);
+      
       const categories = await Promise.all(
         category.map(async (item: any) => {
           const { title } = item;
@@ -111,7 +115,10 @@ export const updateLayout = asyncHandeler(
           return { title };
         })
       );
-      await Layout.findByIdAndUpdate(categoryData?._id,{ type: "category", categories: categories });
+      await Layout.findByIdAndUpdate(categoryData?._id, {
+        type: "category",
+        categories: categories,
+      });
     }
     res.status(200).json({
       success: true,
@@ -121,14 +128,14 @@ export const updateLayout = asyncHandeler(
 );
 
 // @desc   Get layout by type
-// @route  GET /api/v1/layout/
+// @route  GET /api/v1/layout/get/:typeId
 // @access Public
 export const getLayout = asyncHandeler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const layout = await Layout.findOne({type:req.body.type})
+    const layout = await Layout.findOne({ type: req.params.type });
     res.status(200).json({
       success: true,
-      layout
+      layout,
     });
   }
-)
+);
