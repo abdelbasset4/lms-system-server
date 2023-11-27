@@ -5,6 +5,6 @@ import { createLayout, getLayout, updateLayout } from '../services/layoutService
 
 layoutRoute.post('/create',isAuthenticated,isAllowed('admin'),createLayout)
 layoutRoute.put('/update',isAuthenticated,isAllowed('admin'),updateLayout)
-layoutRoute.get('/get',getLayout)
+layoutRoute.get('/get/:type',getLayout)
 
 export default layoutRoute;

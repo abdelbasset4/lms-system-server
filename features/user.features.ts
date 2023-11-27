@@ -23,6 +23,7 @@ export const getUsers = async (res: Response) => {
     const users = await User.find({}).sort({ createdAt: -1 });
     res.status(200).json({
         success: true,
+        result:users.length,
         users,
     });
 }

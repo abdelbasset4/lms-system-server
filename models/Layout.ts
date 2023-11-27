@@ -15,7 +15,7 @@ interface ILayout extends Document {
   type: string;
   faqs: IFAQ[];
   categories: ICategory[];
-  bannerImages: {
+  banner: {
     image: IBannerImage;
     title: string;
     subtitle: string;
@@ -50,7 +50,7 @@ const LayoutSchema = new Schema<ILayout>(
     type: { type: String, required: [true,"type is required"] },
     faqs: [FAQSchema],
     categories: [CategorySchema],
-    bannerImages: {
+    banner: {
       image: BannerImageSchema,
       title: { type: String },
       subtitle: { type: String},
